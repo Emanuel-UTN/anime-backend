@@ -9,7 +9,8 @@ import cors from 'cors';
 app.use(cors());
 
 // Importar routers
-
+import contenidosRouter from './routers/contenidosRouter.js';
+app.use('/api/contenidos', contenidosRouter);
 
 // Levantar servidor
 if (process.env.NODE_ENV !== 'test') {

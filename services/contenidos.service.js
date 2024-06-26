@@ -10,22 +10,31 @@ import TiposContenido from '../models-sequelize/TiposContenido.js';
 
 //#region Funciones del Servicio
 async function getContenidos(where) {
-    const contenidos = await ContenidosBD.findAll({ where });
-
-    // Usamos Promise.all para esperar a que todas las promesas se resuelvan
-    return await Promise.all(contenidos.map(contenido => crearObjeto(contenido)));
+    try {
+        const contenidos = await ContenidosBD.findAll({ where });
+        // Usamos Promise.all para esperar a que todas las promesas se resuelvan
+        return await Promise.all(contenidos.map(contenido => crearObjeto(contenido)));
+    } catch (error) {
+        // Aquí puedes manejar el error de alguna manera adecuada
+        throw error; // Puedes re-lanzar el error o manejarlo según sea necesario
+    }
 }
 
 async function getContenidoById(id_anime, orden) {
-    const contenido = await ContenidosBD.findOne({
-        where: {
-            id_anime,
-            orden
-        }
-    });
-
-    return await crearObjeto(contenido);
+    try {
+        const contenido = await ContenidosBD.findOne({
+            where: {
+                id_anime,
+                orden
+            }
+        });
+        return await crearObjeto(contenido);
+    } catch (error) {
+        // Aquí puedes manejar el error de alguna manera adecuada
+        throw error; // Puedes re-lanzar el error o manejarlo según sea necesario
+    }
 }
+
 
 async function postContenido(id_anime, contenido) {
     const contenidoBD = await ContenidosBD.create(await crearJson(id_anime, contenido));
@@ -56,12 +65,12 @@ async function postContenido(id_anime, contenido) {
     return contenidoBD;
 }
 
-async function putContenido(id_anime, contenido) {
+async function putContenido(id_anime, orden, contenido) {
     // Buscamos el contenido en la BD
     const contenidoBD = await ContenidosBD.findOne({
         where: {
             id_anime,
-            orden: contenido.id
+            orden
         }
     });
     // Si no existe el contenido, retornamos null
@@ -73,7 +82,7 @@ async function putContenido(id_anime, contenido) {
     await ContenidoEtiquetas.destroy({
         where: {
             id_anime,
-            orden: contenido.id,
+            orden,
             id_etiqueta: {
                 [Op.notIn]: await Etiquetas.findAll({ where: { nombre: {[Op.in]: contenido.etiquetas} }, attributes: ['id'] })
             }
@@ -89,7 +98,7 @@ async function putContenido(id_anime, contenido) {
         let contE = await ContenidoEtiquetas.findOne({
             where: {
                 id_anime,
-                orden: contenido.id,
+                orden,
                 id_etiqueta: e.id
             }
         });
@@ -97,7 +106,7 @@ async function putContenido(id_anime, contenido) {
         if (!contE) 
             await ContenidoEtiquetas.create({
                 id_anime,
-                orden: contenido.id,
+                orden,
                 id_etiqueta: e.id
             });
     });
@@ -106,7 +115,7 @@ async function putContenido(id_anime, contenido) {
     await UrlsContenido.destroy({
         where: {
             id_anime,
-            orden: contenido.id,
+            orden,
             url: {
                 [Op.notIn]: contenido.urls.map(url => url.url)
             }
@@ -118,7 +127,7 @@ async function putContenido(id_anime, contenido) {
         let u = await UrlsContenido.findOne({
             where: {
                 id_anime,
-                orden: contenido.id,
+                orden,
                 sitio_web: url.site,
                 url: url.url
             }
@@ -127,11 +136,13 @@ async function putContenido(id_anime, contenido) {
         if (!u)
             await UrlsContenido.create({
                 id_anime,
-                orden: contenido.id,
+                orden,
                 sitio_web: url.site,
                 url: url.url
             });
     });
+
+    return contenidoBD;
 }
 
 async function deleteContenido(id_anime, orden) {
@@ -163,7 +174,7 @@ async function deleteContenido(id_anime, orden) {
     });
 
     // Eliminamos el contenido
-    await contenidoBD.destroy();
+    return await contenidoBD.destroy();
 }
 
 async function deleteContenidos(id_anime, ordenes) {
@@ -215,6 +226,10 @@ async function crearContenido(contenido, etiquetas, urls) {
  * @returns {ContenidoClass} - Objeto Contenido { id, title, type, enEspanol, enEmision, imagenUrl, altText, etiquetas, urls }
  */
 async function crearObjeto(contenido) {
+    if (!contenido) {
+        throw new Error('Contenido no encontrado');
+    }
+
     // Obtenemos las etiquetas relacionadas con el contenido
     const etiquetasBD = await ContenidoEtiquetas.findAll({
         where: {
