@@ -9,8 +9,10 @@ import cors from 'cors';
 app.use(cors());
 
 // Importar routers
-import contenidosRouter from './routers/contenidosRouter.js';
+import contenidosRouter from './routers/contenidosRouter.js';   // CONTENIDOS
 app.use('/api/contenidos', contenidosRouter);
+import animesRouter from './routers/animesRouter.js';           // ANIMES
+app.use('/api/animes', animesRouter);
 
 // Levantar servidor
 if (process.env.NODE_ENV !== 'test') {

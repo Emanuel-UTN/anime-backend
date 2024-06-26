@@ -8,15 +8,23 @@ import contenidosService from './contenidos.service.js';
 //#region Funciones del Servicio
 
 async function getAnimes(where) {
-    const animes = await AnimesBD.findAll({ where });
+    try {
+        const animes = await AnimesBD.findAll({ where });
 
-    return await Promise.all(animes.map(anime => crearObjeto(anime)));
+        return await Promise.all(animes.map(anime => crearObjeto(anime)));
+    } catch (error) {
+        throw new Error('Animes no encontrados');
+    }
 }
 
 async function getAnimeById(id) {
-    const anime = await AnimesBD.findOne({ where: { id } });
+    try {
+        const anime = await AnimesBD.findOne({ where: { id } });
 
-    return await crearObjeto(anime);
+        return await crearObjeto(anime);
+    } catch (error) {
+        throw new Error('Anime no encontrado');
+    }
 }
 
 async function postAnime(anime) {
