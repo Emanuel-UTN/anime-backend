@@ -1,0 +1,24 @@
+{
+  "name": "anime-backend",
+  "version": "1.0.0",
+  "description": "Backend encargado del manejo y control de animes en una base de datos, este los obtendrá mediante una librería propia (get-animes).",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Emanuel",
+  "license": "ISC",
+  "dependencies": {
+    "@emanuel-utn/get-anime": "^1.1.1",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "sequelize": "^6.37.3",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
