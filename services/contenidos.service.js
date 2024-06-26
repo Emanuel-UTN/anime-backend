@@ -9,8 +9,8 @@ import UrlsContenido from '../models-sequelize/UrlsContenido.js';
 import TiposContenido from '../models-sequelize/TiposContenido.js';
 
 //#region Funciones del Servicio
-async function getContenidos() {
-    const contenidos = await ContenidosBD.findAll();
+async function getContenidos(where) {
+    const contenidos = await ContenidosBD.findAll({ where });
 
     // Usamos Promise.all para esperar a que todas las promesas se resuelvan
     return await Promise.all(contenidos.map(contenido => crearObjeto(contenido)));
@@ -166,6 +166,23 @@ async function deleteContenido(id_anime, orden) {
     await contenidoBD.destroy();
 }
 
+async function deleteContenidos(id_anime, ordenes) {
+    // Eliminamos los contenidos que no esten en el nuevo listado
+    const contenidos = await ContenidosBD.findAll({
+        where: {
+            id_anime,
+            orden: {
+                [Op.notIn]: ordenes
+            }
+        }
+    });
+
+    for (const contenido of contenidos) {
+        await deleteContenido(id_anime, contenido.orden);
+    }
+}
+
+
 //#endregion
 
 //#region Funciones Auxiliares
@@ -254,5 +271,6 @@ export default {
     getContenidoById,
     postContenido,
     putContenido,
-    deleteContenido
+    deleteContenido,
+    deleteContenidos
 };
