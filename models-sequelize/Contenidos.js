@@ -1,21 +1,22 @@
 import sequelize from "../base-orm/sequelize-init.js";
 import { DataTypes } from "sequelize";
-
-// Importar dependencias
 import Animes from "./Animes.js";
 import TiposContenido from "./TiposContenido.js";
 import Etiquetas from "./Etiquetas.js";
-import ContenidoEtiqueta from "./ContenidoEtiqueta.js";
-import UrlsContenido from "./UrlsContenido.js";
+import ContenidoEtiquetas from "./ContenidoEtiqueta.js";
 
 /* =============================================
-    // TABLA CONTENIDOS
+// TABLA CONTENIDOS
 ============================================= */
 
 const Contenidos = sequelize.define("Contenidos", {
     id_anime: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        references: {
+            model: Animes,
+            key: "id"
+        }
     },
     orden: {
         type: DataTypes.INTEGER,
@@ -35,6 +36,10 @@ const Contenidos = sequelize.define("Contenidos", {
     tipo: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: TiposContenido,
+            key: "id"
+        }
     },
     enEspanol: {
         type: DataTypes.BOOLEAN,

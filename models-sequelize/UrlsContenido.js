@@ -20,6 +20,10 @@ const UrlsContenido = sequelize.define("UrlsContenido", {
     },
     sitio_web: {
         type: DataTypes.STRING,
+        references: {
+            model: SitiosWeb,
+            key: "nombre"
+        }
     },
     url: {
         type: DataTypes.STRING,

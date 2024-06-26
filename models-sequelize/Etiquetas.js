@@ -1,12 +1,8 @@
 import sequelize from "../base-orm/sequelize-init.js";
 import { DataTypes } from "sequelize";
 
-// Importar dependencias
-import Contenidos from "./Contenidos.js";
-import ContenidoEtiqueta from "./ContenidoEtiqueta.js";
-
 /* =============================================
-    // TABLA ETIQUETAS
+// TABLA ETIQUETAS
 ============================================= */
 
 const Etiquetas = sequelize.define("Etiquetas", {
@@ -15,20 +11,17 @@ const Etiquetas = sequelize.define("Etiquetas", {
         primaryKey: true,
         autoIncrement: true
     },
-    etiqueta: {
+    nombre: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
         validate: {
             notEmpty: {
                 args: true,
-                msg: "La etiqueta no puede estar vacía"
+                msg: "El nombre no puede estar vacío"
             }
         }
     }
 });
-
-// Relaciones
-
 
 export default Etiquetas;

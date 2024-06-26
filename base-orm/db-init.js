@@ -5,7 +5,7 @@ import Animes from "../models-sequelize/Animes.js";
 import TiposContenido from "../models-sequelize/TiposContenido.js";
 import Etiquetas from "../models-sequelize/Etiquetas.js";
 import Contenidos from "../models-sequelize/Contenidos.js";
-import ContenidoEtiqueta from "../models-sequelize/ContenidoEtiqueta.js";
+import ContenidoEtiquetas from "../models-sequelize/ContenidoEtiqueta.js";
 import UrlsContenido from "../models-sequelize/UrlsContenido.js";
 import SitiosWeb from "../models-sequelize/SitiosWeb.js";
 
@@ -19,20 +19,21 @@ async function initBD() {
     // CONTENIDO
     Contenidos.belongsTo(Animes, { foreignKey: "id_anime" });
     Contenidos.belongsTo(TiposContenido, { foreignKey: "tipo" });
+    
+    Contenidos.belongsToMany(Etiquetas, { through: ContenidoEtiquetas, foreignKey: "id_anime", otherKey: "id_etiqueta" });
+    Etiquetas.belongsToMany(Contenidos, { through: ContenidoEtiquetas, foreignKey: "id_etiqueta", otherKey: "id_anime" });
+    
+    Contenidos.hasMany(ContenidoEtiquetas, { foreignKey: "id_anime" });
+    Contenidos.hasMany(ContenidoEtiquetas, { foreignKey: "orden" });
 
-    Contenidos.belongsToMany(Etiquetas, { through: ContenidoEtiqueta, foreignKey: "id_anime", otherKey: "id_etiqueta" });
-    Etiquetas.belongsToMany(Contenidos, { through: ContenidoEtiqueta, foreignKey: "id_etiqueta", otherKey: "id_anime" });
-
-    Contenidos.hasMany(UrlsContenido, { foreignKey: "id_anime" });
-    Contenidos.hasMany(UrlsContenido, { foreignKey: "orden" });
-
-    // ETIQUETAS
-    Etiquetas.belongsToMany(Contenidos, { through: ContenidoEtiqueta, foreignKey: "id_etiqueta", otherKey: "id_anime" });
-    Contenidos.belongsToMany(Etiquetas, { through: ContenidoEtiqueta, foreignKey: "id_anime", otherKey: "id_etiqueta" });
+    // CONTENIDO ETIQUETA
+    ContenidoEtiquetas.belongsTo(Etiquetas, { foreignKey: "id_etiqueta" });
+    ContenidoEtiquetas.belongsTo(Contenidos, { foreignKey: "id_anime" });
+    ContenidoEtiquetas.belongsTo(Contenidos, { foreignKey: "orden" });
 
     // URLS CONTENIDO
-    UrlsContenido.belongsTo(Contenidos, { foreignKey: { name: "id_anime", allowNull: false } });
-    UrlsContenido.belongsTo(Contenidos, { foreignKey: { name: "orden", allowNull: false } });
+    UrlsContenido.belongsTo(Contenidos, { foreignKey: 'id_anime' });
+    UrlsContenido.belongsTo(Contenidos, { foreignKey: 'orden' });
     UrlsContenido.belongsTo(SitiosWeb, { foreignKey: "sitio_web" });
 
     Contenidos.hasMany(UrlsContenido, { foreignKey: "id_anime" });
@@ -122,54 +123,54 @@ async function initBD() {
     });
 
     const etiqueta1 = await Etiquetas.create({
-        etiqueta: 'Aventura'
+        nombre: 'Aventura'
     });
 
     const etiqueta2 = await Etiquetas.create({
-        etiqueta: 'Acción'
+        nombre: 'Acción'
     });
 
     const etiqueta3 = await Etiquetas.create({
-        etiqueta: 'Comedia'
+        nombre: 'Comedia'
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont1.id_anime,
         orden: cont1.orden,
         id_etiqueta: etiqueta1.id
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont1.id_anime,
         orden: cont1.orden,
         id_etiqueta: etiqueta2.id
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont1.id_anime,
         orden: cont1.orden,
         id_etiqueta: etiqueta3.id
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont2.id_anime,
         orden: cont2.orden,
         id_etiqueta: etiqueta1.id
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont2.id_anime,
         orden: cont2.orden,
         id_etiqueta: etiqueta2.id
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont3.id_anime,
         orden: cont3.orden,
         id_etiqueta: etiqueta2.id
     });
 
-    await ContenidoEtiqueta.create({
+    await ContenidoEtiquetas.create({
         id_anime: cont3.id_anime,
         orden: cont3.orden,
         id_etiqueta: etiqueta3.id
@@ -202,9 +203,6 @@ async function initBD() {
         sitio_web: 'anime-jl',
         url: 'anime/1298/dragon-ball-daima-latino'
     });
-
-    // Cerrar conexión
-    await sequelize.close();
 }
 
 export default initBD;

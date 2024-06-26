@@ -2,25 +2,28 @@ import sequelize from "../base-orm/sequelize-init.js";
 import { DataTypes } from "sequelize";
 
 // Importar dependencias
-import Contenidos from "./Contenidos.js";
 import Etiquetas from "./Etiquetas.js";
 
 /* =============================================
-    // TABLA CONTENIDOETIQUETAS
+// TABLA CONTENIDO ETIQUETA
 ============================================= */
 
 const ContenidoEtiquetas = sequelize.define("ContenidoEtiquetas", {
     id_anime: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
+        primaryKey: true
     },
     orden: {
         type: DataTypes.INTEGER,
-        primaryKey: true,
+        primaryKey: true
     },
     id_etiqueta: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        references: {
+            model: Etiquetas,
+            key: 'id'
+        }
     }
 });
 
