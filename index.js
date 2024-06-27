@@ -14,6 +14,12 @@ import contenidosRouter from './routers/contenidosRouter.js';   // CONTENIDOS
 app.use('/api/contenidos', contenidosRouter);
 import animesRouter from './routers/animesRouter.js';           // ANIMES
 app.use('/api/animes', animesRouter);
+import calificacionesRouter from './routers/calificacionesRouter.js'; // CALIFICACIONES
+app.use('/api/calificaciones', calificacionesRouter);
+import etiquetasRouter from './routers/etiquetasRouter.js';     // ETIQUETAS
+app.use('/api/etiquetas', etiquetasRouter);
+import sitiosRouter from './routers/sitiosRouter.js';           // SITIOS WEB
+app.use('/api/sitios', sitiosRouter);
 
 // Levantar servidor
 if (process.env.NODE_ENV !== 'test') {
