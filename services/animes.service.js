@@ -1,7 +1,5 @@
-import { Anime as AnimeClass, Contenido as ContenidoClass } from '@emanuel-utn/get-anime';
+import { Anime as AnimeClass, Contenido as ContenidoClass, getAnime, updateAnime } from '@emanuel-utn/get-anime';
 import AnimesBD from '../models-sequelize/Animes.js';
-
-import { Op } from 'sequelize';
 
 import contenidosService from './contenidos.service.js';
 
@@ -28,19 +26,32 @@ async function getAnimeById(id) {
 }
 
 async function postAnime(anime) {
-    const animeBD = await AnimesBD.create(crearJSON(anime));
+    if (!anime.nombre) {
+        if (await AnimesBD.findOne({ where: { titulo: anime.title } })) throw new Error('Anime ya existe');
 
-    // Guardamos los contenidos
-    await anime.contenidos.forEach(async contenido => {
-        await contenidosService.postContenido(anime.id, contenido);
-    });
+        const animeBD = await AnimesBD.create({ titulo: anime.title, tipo: anime.type, enEmision: anime.enEmision });
 
-    return animeBD;
+        // Guardamos los contenidos
+        for (let i in anime.contenidos) {
+            anime.contenidos[i].id = i;
+            await contenidosService.postContenido(animeBD.id, anime.contenidos[i]);
+        }
+        
+        return animeBD;
+    } else {
+        let nuevoAnime = await AnimesBD.findOne({ where: { titulo: anime.nombre } });
+
+        if (nuevoAnime) throw new Error('Anime ya existe');
+
+        nuevoAnime = await getAnime(anime.nombre);
+
+        return nuevoAnime;
+    }
 }
 
-async function putAnime(anime) {
+async function putAnime(id, anime) {
     // Buscamos el anime en la BD
-    const animeBD = await AnimesBD.findOne({ where: { id: anime.id } });
+    const animeBD = await AnimesBD.findOne({ where: { id } });
 
     if (!animeBD) throw new Error('Anime no encontrado');
 
@@ -48,12 +59,12 @@ async function putAnime(anime) {
     await animeBD.update(crearJSON(anime));
 
     // Eliminamos los contenidos que no esten en el nuevo listado
-    await contenidosService.deleteContenidos(anime.id, anime.contenidos.map(contenido => contenido.id));
+    await contenidosService.deleteContenidos(id, anime.contenidos.map(contenido => contenido.id));
 
     // Actualizamos los contenidos
-    await anime.contenidos.forEach(async contenido => {
-        await contenidosService.putContenido(anime.id, contenido);
-    });
+    for (let contenido of anime.contenidos) {
+        await contenidosService.putContenido(id, contenido.id, contenido);
+    }
 
     return animeBD;
 }
@@ -66,12 +77,24 @@ async function deleteAnime(id) {
     // Elimina los contenidos asociados al anime
     await contenidosService.deleteContenidos(id, []);
 
-    console.log('Eliminando anime')
-
     // Ahora puedes eliminar el anime
     await anime.destroy();
 
     return anime;
+}
+
+async function updateAnimes() {
+    const animes = await AnimesBD.findAll();
+
+    for (let anime of animes) {
+        const animeActualizado = await crearObjeto(anime)
+            .then(async (anime) => await updateAnime(anime))
+            .catch((error) => console.log(error));
+
+        if (!animeActualizado) continue;
+
+        await putAnime(anime.id, animeActualizado);
+    }
 }
 
 //#endregion
@@ -128,5 +151,6 @@ export default {
     getAnimeById,
     postAnime,
     putAnime,
-    deleteAnime
+    deleteAnime,
+    updateAnimes
 };

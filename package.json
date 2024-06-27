@@ -12,7 +12,7 @@
   "author": "Emanuel",
   "license": "ISC",
   "dependencies": {
-    "@emanuel-utn/get-anime": "^1.1.1",
+    "@emanuel-utn/get-anime": "^1.1.2",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "sequelize": "^6.37.3",

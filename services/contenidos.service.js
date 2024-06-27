@@ -35,32 +35,32 @@ async function getContenidoById(id_anime, orden) {
     }
 }
 
-
 async function postContenido(id_anime, contenido) {
     const contenidoBD = await ContenidosBD.create(await crearJson(id_anime, contenido));
 
     // Guardamos las etiquetas
-    await contenido.etiquetas.forEach(async etiqueta => {
+    for (let etiqueta of contenido.etiquetas) {
         let e = await Etiquetas.findOne({ where: { nombre: etiqueta } });
 
-        if (!e) e = await Etiquetas.create({ nombre: etiqueta });
+        if (!e) 
+            e = await Etiquetas.create({ nombre: etiqueta });
 
         await ContenidoEtiquetas.create({
             id_anime,
             orden: contenido.id,
             id_etiqueta: e.id
         });
-    });
+    }
 
     // Guardamos las urls
-    await contenido.urls.forEach(async url => {
+    for (let url of contenido.urls) {
         await UrlsContenido.create({
             id_anime,
             orden: contenido.id,
             sitio_web: url.site,
             url: url.url
         });
-    });
+    }
 
     return contenidoBD;
 }
@@ -90,7 +90,7 @@ async function putContenido(id_anime, orden, contenido) {
     });
 
     // Guardamos las etiquetas
-    await contenido.etiquetas.forEach(async etiqueta => {
+    for (let etiqueta of contenido.etiquetas) {
         let e = await Etiquetas.findOne({ where: { nombre: etiqueta } });
 
         if (!e) e = await Etiquetas.create({ nombre: etiqueta });
@@ -109,7 +109,7 @@ async function putContenido(id_anime, orden, contenido) {
                 orden,
                 id_etiqueta: e.id
             });
-    });
+    }
 
     // Eliminamos las urls que no esten en el contenido
     await UrlsContenido.destroy({
@@ -123,7 +123,7 @@ async function putContenido(id_anime, orden, contenido) {
     });
 
     // Guardamos las urls
-    await contenido.urls.forEach(async url => {
+    for (let url of contenido.urls) {
         let u = await UrlsContenido.findOne({
             where: {
                 id_anime,
@@ -140,7 +140,7 @@ async function putContenido(id_anime, orden, contenido) {
                 sitio_web: url.site,
                 url: url.url
             });
-    });
+    }
 
     return contenidoBD;
 }
