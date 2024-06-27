@@ -2,12 +2,14 @@ import { Anime as AnimeClass, Contenido as ContenidoClass, getAnime, updateAnime
 import AnimesBD from '../models-sequelize/Animes.js';
 
 import contenidosService from './contenidos.service.js';
+import Estados from '../models-sequelize/Estados.js';
+import Calificaciones from '../models-sequelize/Calificaciones.js';
 
 //#region Funciones del Servicio
 
 async function getAnimes(where) {
     try {
-        const animes = await AnimesBD.findAll({ where });
+        const animes = await AnimesBD.findAll({ where, order: [["enEmision", "DESC"], ["estado", "ASC"], ["calificacion", "DESC"]] });
 
         return await Promise.all(animes.map(anime => crearObjeto(anime)));
     } catch (error) {
@@ -56,7 +58,7 @@ async function putAnime(id, anime) {
     if (!animeBD) throw new Error('Anime no encontrado');
 
     // Actualizamos los datos
-    await animeBD.update(crearJSON(anime));
+    await crearJSON(anime).then(async (json) => await animeBD.update(json));
 
     // Eliminamos los contenidos que no esten en el nuevo listado
     await contenidosService.deleteContenidos(id, anime.contenidos.map(contenido => contenido.id));
@@ -127,7 +129,12 @@ function crearAnime(anime, contenidos) {
 async function crearObjeto(anime) {
     const contenidos = await contenidosService.getContenidos( { id_anime: anime.id });
 
-    return crearAnime(anime, contenidos);
+    const nuevoAnime = crearAnime(anime, contenidos);
+    
+    nuevoAnime.estado = await Estados.findOne({ where: { id: anime.estado } }).then(estado => estado.nombre);
+    nuevoAnime.calificacion = await Calificaciones.findOne({ where: { id: anime.calificacion } }).then(calificacion => calificacion.nombre);
+
+    return nuevoAnime;
 }
 
 /**
@@ -136,12 +143,14 @@ async function crearObjeto(anime) {
  * @param {AnimeClass} anime - Anime de la BD
  * @returns {JSON} - JSON { id, titulo, tipo, enEmision }
  */
-function crearJSON(anime) {
+async function crearJSON(anime) {
     return {
         id: anime.id,
         titulo: anime.title,
         tipo: anime.type,
-        enEmision: anime.enEmision
+        enEmision: anime.enEmision,
+        estado: await Estados.findOne({ where: { nombre: anime.estado ?? '' } }).then(estado => estado ? estado.id : 1),
+        calificacion: await Calificaciones.findOne({ where: { nombre: anime.calificacion ?? '' } }).then(calificacion => calificacion ? calificacion.id : 1)
     }
 }
 //#endregion

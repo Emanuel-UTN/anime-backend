@@ -1,7 +1,7 @@
-import { Contenido as ContenidoClass } from '@emanuel-utn/get-anime';
+import { Contenido as ContenidoClass } from '../../get-anime/get-anime.js';
 import ContenidosBD from '../models-sequelize/Contenidos.js';
 
-import { Op } from 'sequelize';
+import { Op, UniqueConstraintError } from 'sequelize';
 
 import ContenidoEtiquetas from '../models-sequelize/ContenidoEtiqueta.js';
 import Etiquetas from '../models-sequelize/Etiquetas.js';
@@ -40,16 +40,31 @@ async function postContenido(id_anime, contenido) {
 
     // Guardamos las etiquetas
     for (let etiqueta of contenido.etiquetas) {
-        let e = await Etiquetas.findOne({ where: { nombre: etiqueta } });
+        let e = await Etiquetas.findOne({ where: { nombre: etiqueta }, collate: 'utf8_general_ci' });
+        
+        if(!e){
+            // Si no se encontro la etiqueta, buscamos por similitud
+            for (let et of await Etiquetas.findAll()) {
+                if (normalizeText(et.nombre).toLowerCase() === normalizeText(etiqueta).toLowerCase()) {
+                    e = et;
+                    break ;
+                }
+            }
+        }
 
         if (!e) 
             e = await Etiquetas.create({ nombre: etiqueta });
 
-        await ContenidoEtiquetas.create({
-            id_anime,
-            orden: contenido.id,
-            id_etiqueta: e.id
-        });
+        try {
+            await ContenidoEtiquetas.create({
+                id_anime,
+                orden: contenido.id,
+                id_etiqueta: e.id
+            });
+        } catch (error) {
+            if (error instanceof UniqueConstraintError) continue;
+            throw error;
+        }
     }
 
     // Guardamos las urls
@@ -278,6 +293,16 @@ async function crearJson(id_anime, contenido) {
         imagen: contenido.imagenUrl,
     };
 }
+
+/**
+ * Funcion encargada de normalizar un texto
+ * 
+ * @param {String} text - Texto a normalizar
+ * @returns {String} - Texto normalizado { "á" -> "a" }
+ */
+const normalizeText = (text) => {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+};
 
 //#endregion
 

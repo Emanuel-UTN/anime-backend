@@ -2,6 +2,8 @@ import sequelize from "./sequelize-init.js";
 
 // Importar Modelos
 import Animes from "../models-sequelize/Animes.js";
+import Estados from "../models-sequelize/Estados.js";
+import Calificaciones from "../models-sequelize/Calificaciones.js";
 import TiposContenido from "../models-sequelize/TiposContenido.js";
 import Etiquetas from "../models-sequelize/Etiquetas.js";
 import Contenidos from "../models-sequelize/Contenidos.js";
@@ -16,6 +18,10 @@ async function initBD() {
 
     //#region Relaciones
     // Definir Relaciones
+    // ANIMES
+    Animes.belongsTo(Estados, { foreignKey: "estado" });
+    Animes.belongsTo(Calificaciones, { foreignKey: "calificacion" });
+
     // CONTENIDO
     Contenidos.belongsTo(Animes, { foreignKey: "id_anime" });
     Contenidos.belongsTo(TiposContenido, { foreignKey: "tipo" });
@@ -80,6 +86,51 @@ async function initBD() {
 
         for(let d of datos) {
             await TiposContenido.create(d);
+        }
+    }
+
+    /* =============================================
+        // TABLA ESTADOS
+    ============================================= */
+    res = await Estados.count();
+
+    if (res > 0) existe = true;
+    if (!existe) {
+        // INSERTAR DATOS EN LA TABLA ESTADOS
+        let datos = [
+            { nombre: 'Por Ver' },
+            { nombre: 'Viendo' },
+            { nombre: 'Visto' }
+        ]
+
+        for(let d of datos) {
+            await Estados.create(d);
+        }
+    }
+
+    /* =============================================
+        // TABLA CALIFICACIONES
+    ============================================= */
+    res = await Calificaciones.count();
+
+    if (res > 0) existe = true;
+    if (!existe) {
+        // INSERTAR DATOS EN LA TABLA CALIFICACIONES
+        let datos = [
+            { nombre: 'Sin Calificar' },
+            { nombre: 'Pésimo' },
+            { nombre: 'Muy Malo' },
+            { nombre: 'Malo' },
+            { nombre: 'Regular' },
+            { nombre: 'Bueno' },
+            { nombre: 'Muy Bueno' },
+            { nombre: 'Buenisimo' },
+            { nombre: 'Excelente' },
+            { nombre: 'Obra Maestra' }
+        ]
+
+        for(let d of datos) {
+            await Calificaciones.create(d);
         }
     }
 
