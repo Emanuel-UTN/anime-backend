@@ -1,13 +1,16 @@
 import { Router } from "express";
 const router = Router();
 
-import Calificaciones from "../models-sequelize/Calificaciones.js";
+import Calificaciones from "../models/Calificaciones.js";
 
-import { ValidationError, UniqueConstraintError } from "sequelize";
+import { ValidationError, UniqueConstraintError, Op } from "sequelize";
 
 router.get('/', async (req, res) => {
     try {
-        const calificaciones = await Calificaciones.findAll();
+        let where = {};
+        if (req.query.nombre !== undefined && req.query.nombre !== '') 
+            where.nombre = { [Op.substring]: req.query.nombre };
+        const calificaciones = await Calificaciones.findAll({ where });
 
         if (calificaciones.length === 0) {
             res.status(404).json({ error: 'No se encontraron calificaciones' });
@@ -35,13 +38,15 @@ router.get('/:id_calificacion', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
+        if (req.body.id === 0)
+            req.body.id = null;
         const calificacion = await Calificaciones.create(req.body);
 
         res.status(201).json(calificacion);
 
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(', '));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         } else if (error instanceof UniqueConstraintError) {
             res.status(400).json({ error: 'Calificacion ya existe' });
         } else {
@@ -62,7 +67,7 @@ router.put('/:id_calificacion', async (req, res) => {
         }
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(', '));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         } else {
             res.status(500).json({ error: error.message });
         }

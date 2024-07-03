@@ -2,10 +2,10 @@ import sequelize from "../base-orm/sequelize-init.js";
 import { DataTypes } from "sequelize";
 
 /* =============================================
-// TABLA ETIQUETAS
+    // TABLA CALIFICACIONES
 ============================================= */
 
-const Etiquetas = sequelize.define("Etiquetas", {
+const Calificaciones = sequelize.define("Calificaciones", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -14,14 +14,17 @@ const Etiquetas = sequelize.define("Etiquetas", {
     nombre: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+            args: true,
+            msg: "La calificacion ya existe"
+        },
         validate: {
             notEmpty: {
                 args: true,
-                msg: "El nombre no puede estar vacío"
+                msg: "El nombre de la calificacion no puede estar vacío"
             }
         }
     }
 });
 
-export default Etiquetas;
+export default Calificaciones;

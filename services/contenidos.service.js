@@ -1,12 +1,12 @@
 import { Contenido as ContenidoClass } from '../../get-anime/get-anime.js';
-import ContenidosBD from '../models-sequelize/Contenidos.js';
+import ContenidosBD from '../models/Contenidos.js';
 
 import { Op, UniqueConstraintError } from 'sequelize';
 
-import ContenidoEtiquetas from '../models-sequelize/ContenidoEtiqueta.js';
-import Etiquetas from '../models-sequelize/Etiquetas.js';
-import UrlsContenido from '../models-sequelize/UrlsContenido.js';
-import TiposContenido from '../models-sequelize/TiposContenido.js';
+import ContenidoEtiquetas from '../models/ContenidoEtiqueta.js';
+import Etiquetas from '../models/Etiquetas.js';
+import UrlsContenido from '../models/UrlsContenido.js';
+import TiposContenido from '../models/TiposContenido.js';
 
 //#region Funciones del Servicio
 async function getContenidos(where) {

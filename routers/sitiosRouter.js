@@ -1,13 +1,16 @@
 import { Router } from "express";
 const router = Router();
 
-import SitiosWeb from "../models-sequelize/SitiosWeb.js";
+import SitiosWeb from "../models/SitiosWeb.js";
 
-import { ValidationError, UniqueConstraintError } from "sequelize";
+import { ValidationError, UniqueConstraintError, Op } from "sequelize";
 
 router.get('/', async (req, res) => {
     try {
-        const sitios = await SitiosWeb.findAll();
+        let where = {};
+        if (req.query.nombre !== undefined && req.query.nombre !== '') 
+            where.nombre = { [Op.substring]: req.query.nombre };
+        const sitios = await SitiosWeb.findAll({ where });
 
         if (sitios.length === 0) {
             res.status(404).json({ error: 'No se encontraron sitios' });
@@ -41,7 +44,7 @@ router.post('/', async (req, res) => {
 
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(', '));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         } else if (error instanceof UniqueConstraintError) {
             res.status(400).json({ error: 'Sitio ya existe' });
         } else {
@@ -63,7 +66,7 @@ router.put('/:nombre', async (req, res) => {
         }
     } catch (error) {
         if (error instanceof ValidationError)
-            res.status(400).send(error.errors.map(err => err.message).join(', '));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         else
             res.status(500).json({ error: error.message });
     }

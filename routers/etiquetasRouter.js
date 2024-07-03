@@ -1,13 +1,16 @@
 import { Router } from "express";
 const router = Router();
 
-import Etiquetas from "../models-sequelize/Etiquetas.js";
+import Etiquetas from "../models/Etiquetas.js";
 
-import { ValidationError, UniqueConstraintError } from "sequelize";
+import { ValidationError, UniqueConstraintError, Op } from "sequelize";
 
 router.get('/', async (req, res) => {
     try {
-        const etiquetas = await Etiquetas.findAll();
+        let where = {};
+        if (req.query.nombre !== undefined && req.query.nombre !== '') 
+            where.nombre = { [Op.substring]: req.query.nombre };
+        const etiquetas = await Etiquetas.findAll({ where });
 
         if (etiquetas.length === 0) {
             res.status(404).json({ error: 'No se encontraron etiquetas' });
@@ -35,15 +38,17 @@ router.get('/:id_etiqueta', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
+        if (req.body.id === 0)
+            req.body.id = null;
         const etiqueta = await Etiquetas.create(req.body);
 
         res.status(201).json(etiqueta);
 
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(', '));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         } else if (error instanceof UniqueConstraintError) {
-            res.status(400).json({ error: 'Etiqueta ya existe'});
+            res.status(400).send({ error: 'La Etiqueta ya existe'});
         } else {
             res.status(500).json({ error: error.message });
         }
@@ -63,7 +68,7 @@ router.put('/:id_etiqueta', async (req, res) => {
         }
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(', '));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         } else {
             res.status(500).json({ error: error.message });
         }

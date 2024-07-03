@@ -17,7 +17,10 @@ const Animes = sequelize.define("Animes", {
     titulo: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+            args: true,
+            msg: "El anime ya existe"
+        },
         validate: {
             notEmpty: {
                 args: true,

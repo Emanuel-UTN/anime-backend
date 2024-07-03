@@ -17,7 +17,7 @@ contenidosRouter.get("/", async (req, res) => {
             res.status(200).json(contenidos);
         }
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(400).send({ error: error.message });
     }
 });
 
@@ -31,7 +31,7 @@ contenidosRouter.get("/:id_anime/:orden", async (req, res) => {
             res.status(404).json({ error: "Contenido no encontrado" });
         }
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(400).send({ error: error.message });
     }
 });
 
@@ -42,9 +42,9 @@ contenidosRouter.post("/", async (req, res) => {
         res.status(201).json(contenido);
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(", "));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         }else {
-            throw error;
+            res.status(400).send({ error: error.message });
         }
     }
 });
@@ -60,9 +60,9 @@ contenidosRouter.put("/:id_anime/:orden", async (req, res) => {
         }
     } catch (error) {
         if (error instanceof ValidationError) {
-            res.status(400).send(error.errors.map(err => err.message).join(", "));
+            res.status(400).send({ error: error.errors.map(err => err.message).join(', ')});
         } else {
-            throw error;
+            res.status(400).send({ error: error.message });
         }
     }
 });
@@ -77,7 +77,7 @@ contenidosRouter.delete("/:id_anime/:orden", async (req, res) => {
             res.status(404).json({ error: "Contenido no encontrado" });
         }
     } catch (error) {
-        res.status(400).send(error.message);
+        res.status(400).send({ error: error.message });
     }
 });
 

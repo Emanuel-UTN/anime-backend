@@ -9,6 +9,10 @@ const SitiosWeb = sequelize.define("SitiosWeb", {
     nombre: {
         type: DataTypes.STRING,
         primaryKey: true,
+        unique: {
+            args: true,
+            msg: "El sitio ya existe"
+        },
         validate: {
             isLowercase: {
                 args: true,

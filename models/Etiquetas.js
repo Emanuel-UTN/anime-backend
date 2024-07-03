@@ -2,10 +2,10 @@ import sequelize from "../base-orm/sequelize-init.js";
 import { DataTypes } from "sequelize";
 
 /* =============================================
-    // TABLA ESTADOS
+// TABLA ETIQUETAS
 ============================================= */
 
-const Estados = sequelize.define("Estados", {
+const Etiquetas = sequelize.define("Etiquetas", {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -14,7 +14,10 @@ const Estados = sequelize.define("Estados", {
     nombre: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+            args: true,
+            msg: "La etiqueta ya existe"
+        },
         validate: {
             notEmpty: {
                 args: true,
@@ -24,4 +27,4 @@ const Estados = sequelize.define("Estados", {
     }
 });
 
-export default Estados;
+export default Etiquetas;

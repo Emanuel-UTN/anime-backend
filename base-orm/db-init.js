@@ -1,15 +1,15 @@
 import sequelize from "./sequelize-init.js";
 
 // Importar Modelos
-import Animes from "../models-sequelize/Animes.js";
-import Estados from "../models-sequelize/Estados.js";
-import Calificaciones from "../models-sequelize/Calificaciones.js";
-import TiposContenido from "../models-sequelize/TiposContenido.js";
-import Etiquetas from "../models-sequelize/Etiquetas.js";
-import Contenidos from "../models-sequelize/Contenidos.js";
-import ContenidoEtiquetas from "../models-sequelize/ContenidoEtiqueta.js";
-import UrlsContenido from "../models-sequelize/UrlsContenido.js";
-import SitiosWeb from "../models-sequelize/SitiosWeb.js";
+import Animes from "../models/Animes.js";
+import Estados from "../models/Estados.js";
+import Calificaciones from "../models/Calificaciones.js";
+import TiposContenido from "../models/TiposContenido.js";
+import Etiquetas from "../models/Etiquetas.js";
+import Contenidos from "../models/Contenidos.js";
+import ContenidoEtiquetas from "../models/ContenidoEtiqueta.js";
+import UrlsContenido from "../models/UrlsContenido.js";
+import SitiosWeb from "../models/SitiosWeb.js";
 
 
 async function initBD() {

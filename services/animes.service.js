@@ -1,9 +1,11 @@
 import { Anime as AnimeClass, Contenido as ContenidoClass, getAnime, updateAnime } from '@emanuel-utn/get-anime';
-import AnimesBD from '../models-sequelize/Animes.js';
+import AnimesBD from '../models/Animes.js';
 
 import contenidosService from './contenidos.service.js';
-import Estados from '../models-sequelize/Estados.js';
-import Calificaciones from '../models-sequelize/Calificaciones.js';
+import Estados from '../models/Estados.js';
+import Calificaciones from '../models/Calificaciones.js';
+
+import { Op } from 'sequelize';
 
 //#region Funciones del Servicio
 
@@ -29,7 +31,7 @@ async function getAnimeById(id) {
 
 async function postAnime(anime) {
     if (!anime.nombre) {
-        if (await AnimesBD.findOne({ where: { titulo: anime.title } })) throw new Error('Anime ya existe');
+        if (await AnimesBD.findOne({ where: { titulo: { [Op.substring]: anime.title } } })) throw new Error('Anime ya existe');
 
         const animeBD = await AnimesBD.create({ titulo: anime.title, tipo: anime.type, enEmision: anime.enEmision });
 
@@ -41,11 +43,13 @@ async function postAnime(anime) {
         
         return animeBD;
     } else {
-        let nuevoAnime = await AnimesBD.findOne({ where: { titulo: anime.nombre } });
+        let nuevoAnime = await AnimesBD.findOne({ where: { titulo: { [Op.substring]: anime.nombre } } });
 
         if (nuevoAnime) throw new Error('Anime ya existe');
 
         nuevoAnime = await getAnime(anime.nombre);
+
+        if (!nuevoAnime) throw new Error('Anime no encontrado');
 
         return nuevoAnime;
     }
@@ -63,9 +67,21 @@ async function putAnime(id, anime) {
     // Eliminamos los contenidos que no esten en el nuevo listado
     await contenidosService.deleteContenidos(id, anime.contenidos.map(contenido => contenido.id));
 
-    // Actualizamos los contenidos
-    for (let contenido of anime.contenidos) {
-        await contenidosService.putContenido(id, contenido.id, contenido);
+    // Si se cambio el orden de los contenidos los borramos y creamos de cero para evitar problemas
+    if (anime.contenidosActualizados) {
+        // Elimina los contenidos asociados al anime
+        await contenidosService.deleteContenidos(id, []);
+
+        // Guardamos los contenidos
+        for (let i in anime.contenidos) {
+            anime.contenidos[i].id = i;
+            await contenidosService.postContenido(id, anime.contenidos[i]);
+        }
+    }else {
+        // Actualizamos los contenidos
+        for (let contenido of anime.contenidos) {
+            await contenidosService.putContenido(id, contenido.id, contenido);
+        }
     }
 
     return animeBD;
@@ -131,6 +147,7 @@ async function crearObjeto(anime) {
 
     const nuevoAnime = crearAnime(anime, contenidos);
     
+    nuevoAnime.cantContenidos = nuevoAnime.getCantContenido();
     nuevoAnime.estado = await Estados.findOne({ where: { id: anime.estado } }).then(estado => estado.nombre);
     nuevoAnime.calificacion = await Calificaciones.findOne({ where: { id: anime.calificacion } }).then(calificacion => calificacion.nombre);
 

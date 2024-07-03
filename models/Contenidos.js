@@ -25,7 +25,10 @@ const Contenidos = sequelize.define("Contenidos", {
     titulo: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: {
+            args: true,
+            msg: "El contenido ya existe"
+        },
         validate: {
             notEmpty: {
                 args: true,

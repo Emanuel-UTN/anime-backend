@@ -37,13 +37,13 @@ if (process.env.NODE_ENV !== 'test') {
     await animesService.postAnime(anime2)
         .catch(error => null);
 
-    const anime3 = await animesService.postAnime({ nombre: 'Sousou no Frieren' });
+    const anime3 = await animesService.postAnime({ nombre: 'Kaijuu 8-gou' });
 
     await animesService.postAnime(anime3)
         .catch(error => null);
 
     // Actualizar animes
-    await animesService.updateAnimes();
+    //await animesService.updateAnimes();
 
     app.listen(PORT, () => {
         console.log(`\n\nServidor corriendo en http://localhost:${PORT}`);
