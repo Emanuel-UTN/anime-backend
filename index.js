@@ -21,6 +21,9 @@ app.use('/api/etiquetas', etiquetasRouter);
 import sitiosRouter from './routers/sitiosRouter.js';           // SITIOS WEB
 app.use('/api/sitios', sitiosRouter);
 
+import statsRouter from './routers/statsRouter.js';             // STATS
+app.use('/api/stats', statsRouter);
+
 // Levantar servidor
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT || 3000;
