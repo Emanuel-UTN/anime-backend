@@ -1,7 +1,8 @@
+// index.js
 import initBD from './base-orm/db-init.js';
 import animesService from './services/animes.service.js';
-
 import express from 'express';
+
 const app = express();
 app.use(express.json());
 
@@ -45,8 +46,8 @@ if (process.env.NODE_ENV !== 'test') {
     await animesService.postAnime(anime3)
         .catch(error => null);
 
-    // Actualizar animes
-    //await animesService.updateAnimes();
+    // Actualizar animes si ha pasado una semana desde la última actualización
+    await animesService.updateAnimes();
 
     app.listen(PORT, () => {
         console.log(`\n\nServidor corriendo en http://localhost:${PORT}`);

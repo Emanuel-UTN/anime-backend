@@ -1,10 +1,11 @@
-import { Anime as AnimeClass, Contenido as ContenidoClass, getAnime, updateAnime } from '@emanuel-utn/get-anime';
+import { Anime as AnimeClass, Contenido as ContenidoClass, getAnime, updateAnime } from '../../get-anime/get-anime.js';
 import AnimesBD from '../models/Animes.js';
 
 import contenidosService from './contenidos.service.js';
 import Estados from '../models/Estados.js';
 import Calificaciones from '../models/Calificaciones.js';
 
+import Config from '../models/Config.js';
 import { Op } from 'sequelize';
 
 //#region Funciones del Servicio
@@ -102,16 +103,35 @@ async function deleteAnime(id) {
 }
 
 async function updateAnimes() {
-    const animes = await AnimesBD.findAll();
+    const config = await Config.findOne({ where: { key: 'lastUpdateAnimes' } });
+    const lastUpdateDate = config ? new Date(config.value) : new Date('1970-01-01');
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const oneWeekAgo = new Date(today);
+    oneWeekAgo.setDate(today.getDate() - 7);
 
-    for (let anime of animes) {
-        const animeActualizado = await crearObjeto(anime)
-            .then(async (anime) => await updateAnime(anime))
-            .catch((error) => console.log(error));
+    if (lastUpdateDate < oneWeekAgo) {
+        const animes = await AnimesBD.findAll();
 
-        if (!animeActualizado) continue;
+        for (let anime of animes) {
+            const animeActualizado = await crearObjeto(anime)
+                .then(async (anime) => await updateAnime(anime))
+                .catch((error) => console.log(error));
 
-        await putAnime(anime.id, animeActualizado);
+            if (!animeActualizado) continue;
+
+            await putAnime(anime.id, animeActualizado);
+        }
+
+        // Actualizar la fecha de la última ejecución
+        if (config) {
+            config.value = today.toISOString().split('T')[0];
+            await config.save();
+        } else {
+            await Config.create({ key: 'lastUpdateAnimes', value: today });
+        }
+    } else {
+        console.log(`updateAnimes no se ejecutó porque no ha pasado una semana desde la última ejecución (${lastUpdateDate}).`);
     }
 }
 

@@ -11,6 +11,8 @@ import ContenidoEtiquetas from "../models/ContenidoEtiqueta.js";
 import UrlsContenido from "../models/UrlsContenido.js";
 import SitiosWeb from "../models/SitiosWeb.js";
 
+import Config from "../models/Config.js";
+
 
 async function initBD() {
     await sequelize.authenticate();
@@ -51,6 +53,23 @@ async function initBD() {
     //#region Crear registros
     let existe = false;
     let res = null;
+
+    /* =============================================
+        // TABLA CONFIG
+    ============================================= */
+    res = await Config.count();
+
+    if (res > 0) existe = true;
+    if (!existe) {
+        // INSERTAR DATOS EN LA TABLA CONFIG
+        let datos = [
+            { key: 'lastUpdateAnimes', value: '1970-01-01' }
+        ]
+
+        for(let d of datos) {
+            await Config.create(d);
+        }
+    }
 
     /* =============================================
         // TABLA SITIOS WEB
